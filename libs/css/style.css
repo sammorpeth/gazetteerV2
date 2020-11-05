@@ -1,0 +1,16 @@
+ul {
+  padding: 0;
+}
+
+li {
+  list-style-type: none;
+}
+
+#mapid {
+  height: calc(100vh - 60px);
+  width: 100%;
+}
+
+.national-flag {
+  width: 100%;
+}
