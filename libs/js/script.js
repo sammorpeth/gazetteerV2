@@ -1,4 +1,6 @@
 let countryMarker;
+let wikiMarkers;
+let weatherMarker;
 let border;
 const mymap = L.map('mapid').setView([0, 0], 6);
 
@@ -23,7 +25,6 @@ $(document).ready(function() {
       }))
      });
 
-     console.log(result['data']);
   
     },
     error: function(jqXHR, textStatus, errorThrown) {
@@ -44,13 +45,18 @@ $('#country-select').on('change', function() {
     },
     
     success: function(result) {
+    // console.log(result['data']);
 
       const selectedCountry = result['data'];
       // set country's lat and lng
-      countryLat = selectedCountry[0]['latlng'][0];
-      countryLng = selectedCountry[0]['latlng'][1];
+      const countryLat = selectedCountry[0]['latlng'][0];
+      const countryLng = selectedCountry[0]['latlng'][1];
+      const weatherLat = selectedCountry['capitalWeather']['coord']['lat'];
+      const weatherLng = selectedCountry['capitalWeather']['coord']['lon'];
+      const capitalWiki = selectedCountry['capitalWiki'];
+      const capitalWeather = selectedCountry['capitalWeather'];
       
-      const countryInfo = `<h2>${selectedCountry[0]['name']}</h2>
+      const countryInfoHTML = `<h2>${selectedCountry[0]['name']}</h2>
                             <ul class="country-info">
                               <li>Region: ${selectedCountry[0]['region']}</li>
                               <li>Subregion: ${selectedCountry[0]['subregion']}</li>
@@ -61,17 +67,58 @@ $('#country-select').on('change', function() {
                             <ul>`
 
        // go to relevant lat and lng
-       mymap.flyTo([countryLat, countryLng], 4);
+      mymap.flyTo([countryLat, countryLng], 4);
 
-       if(mymap.hasLayer(countryMarker)) {
-         mymap.removeLayer(countryMarker);
-       };
+      if(mymap.hasLayer(countryMarker)) {
+        mymap.removeLayer(countryMarker);
+      };
+      console.log(capitalWeather)
+      countryMarker = L.marker([countryLat,countryLng],)
+                                .addTo(mymap);
+
+    //  L.DomUtil.addClass(countryMarker._icon, 'country-marker');
+      countryMarker.bindPopup(countryInfoHTML);
+
+      if(mymap.hasLayer(weatherMarker)) {
+        mymap.removeLayer(weatherMarker);
+      };
+
+      weatherMarker = L.marker([weatherLat, weatherLng]).addTo(mymap);
+
+      const capitalWeatherHTML = `<h2>${capitalWeather['name']}</h2>
+                                  <ul>
+                                    <li>Weather: ${capitalWeather['weather'][0]['description']}</li>
+                                    <li>Temperature: ${capitalWeather['main']['temp']}&#176;C</li>
+                                    <li>Humidity: ${capitalWeather['main']['humidity']}%</li>
+                                    <li>Wind Speed: ${capitalWeather['wind']['speed']}km/h</li>
+                                   
+                                  <ul>`
       
-       countryMarker = L.marker([countryLat,countryLng],)
-                                 .addTo(mymap);
- 
-      //  L.DomUtil.addClass(countryMarker._icon, 'country-marker');
-       countryMarker.bindPopup(countryInfo);
+      weatherMarker.bindPopup(capitalWeatherHTML);
+
+      if(mymap.hasLayer(wikiMarkers)) {
+        mymap.removeLayer(wikiMarkers);
+      }
+
+      wikiMarkers = L.markerClusterGroup();
+
+      capitalWiki.forEach(element => {
+        const wikiHTML = `${element.summary}
+                          <a href="https://${element.wikipediaUrl}">Read more...</a>
+                          `;
+        wikiMarker = L.marker([element.lat, element.lng]);
+        wikiMarker.bindPopup(wikiHTML);
+
+        wikiMarkers.addLayer(wikiMarker);
+        // console.log(element.lat);
+      })
+
+      mymap.addLayer(wikiMarkers);
+
+
+  
+      
+       
     
 
     },
@@ -94,16 +141,20 @@ $('#country-select').on('change', function() {
     
     success: function(result) {
     
-    console.log(result['data']);
-
+    // Check if there's a previous border, if so remove it.
     if(mymap.hasLayer(border)) {
       mymap.removeLayer(border);
     };
 
-    border = L.geoJSON(result['data']);
-    console.log(border);
+    // Convert the data into a geoJSON object
+    // border = L.geoJSON(result['data'], {
+    //   style: function (feature) {
+    //     return {color: 'red'}
+    // }});
 
-    
+    border = L.geoJSON(result['data']);
+
+    // Zoom and fit the map edge around it
     mymap.fitBounds(border.getBounds());
     border.addTo(mymap);
   
