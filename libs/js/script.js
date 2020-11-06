@@ -10,6 +10,16 @@ const OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}
 }).addTo(mymap);
 
 $(document).ready(function() {
+
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      userPosLat = position.coords.latitude;
+      userPosLng = position.coords.longitude;
+      mymap.setView([userPosLat, userPosLng]);
+    })
+  }
+
+  
   $.ajax({
     url: "libs/php/ISOCode.php",
     type: 'POST',
