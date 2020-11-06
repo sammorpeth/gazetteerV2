@@ -72,13 +72,14 @@ $('#country-select').on('change', function() {
       if(mymap.hasLayer(countryMarker)) {
         mymap.removeLayer(countryMarker);
       };
-      console.log(capitalWeather)
+      
+      // Country Marker
       countryMarker = L.marker([countryLat,countryLng],)
                                 .addTo(mymap);
 
-    //  L.DomUtil.addClass(countryMarker._icon, 'country-marker');
       countryMarker.bindPopup(countryInfoHTML);
 
+      // Weather Marker
       if(mymap.hasLayer(weatherMarker)) {
         mymap.removeLayer(weatherMarker);
       };
@@ -96,6 +97,7 @@ $('#country-select').on('change', function() {
       
       weatherMarker.bindPopup(capitalWeatherHTML);
 
+      // Wiki Marker Clusters
       if(mymap.hasLayer(wikiMarkers)) {
         mymap.removeLayer(wikiMarkers);
       }
@@ -110,16 +112,10 @@ $('#country-select').on('change', function() {
         wikiMarker.bindPopup(wikiHTML);
 
         wikiMarkers.addLayer(wikiMarker);
-        // console.log(element.lat);
       })
 
       mymap.addLayer(wikiMarkers);
 
-
-  
-      
-       
-    
 
     },
     error: function(jqXHR, textStatus, errorThrown) {
@@ -146,11 +142,6 @@ $('#country-select').on('change', function() {
       mymap.removeLayer(border);
     };
 
-    // Convert the data into a geoJSON object
-    // border = L.geoJSON(result['data'], {
-    //   style: function (feature) {
-    //     return {color: 'red'}
-    // }});
 
     border = L.geoJSON(result['data'], {
         style: function (feature) {
