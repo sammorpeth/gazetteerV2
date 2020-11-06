@@ -152,7 +152,10 @@ $('#country-select').on('change', function() {
     //     return {color: 'red'}
     // }});
 
-    border = L.geoJSON(result['data']);
+    border = L.geoJSON(result['data'], {
+        style: function (feature) {
+          return {opacity: 1, color: '#8AC0DE'}
+      }});
 
     // Zoom and fit the map edge around it
     mymap.fitBounds(border.getBounds());

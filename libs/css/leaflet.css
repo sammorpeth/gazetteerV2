@@ -254,7 +254,8 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	outline: 0;
 	}
 .leaflet-container a {
-	color: #0078A8;
+  color: #fff;
+  text-decoration: underline;
 	}
 .leaflet-container a.leaflet-active {
 	outline: 2px solid orange;
@@ -503,8 +504,11 @@ svg.leaflet-image-layer.leaflet-interactive path {
 	}
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {
-	background: white;
-	color: #333;
+  font-size: 1.25em;
+  background: #67B26F;  /* fallback for old browsers */
+  background: -webkit-linear-gradient(to bottom, #0c8ecf, #55a7cf);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to bottom, #0c8ecf, #55a7cf); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+	color: #fff;
 	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
 	}
 .leaflet-container a.leaflet-popup-close-button {
