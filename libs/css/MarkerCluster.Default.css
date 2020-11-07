@@ -1,7 +1,8 @@
 .marker-cluster-small {
 	background: #11998e;  /* fallback for old browsers */
-background: -webkit-linear-gradient(to bottom, #38ef7d, #11998e);  /* Chrome 10-25, Safari 5.1-6 */
-background: linear-gradient(to bottom, #38ef7d, #11998e); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: -webkit-linear-gradient(to bottom, #38ef7d, #11998e);  /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to bottom, #38ef7d, #11998e); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  
 
 	}
 .marker-cluster-small div {
@@ -55,17 +56,17 @@ background: linear-gradient(to bottom, #ec2F4B, #009FFF); /* W3C, IE 10+/ Edge, 
 
 .marker-cluster {
 	background-clip: padding-box;
-	border-radius: 20px;
+  border-radius: 20px;
+  
 	}
 .marker-cluster div {
 	width: 30px;
 	height: 30px;
 	margin-left: 5px;
 	margin-top: 5px;
-
 	text-align: center;
 	border-radius: 15px;
-	font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  font: 12px "Helvetica Neue", Arial, Helvetica, sans-serif;
 	}
 .marker-cluster span {
 	line-height: 30px;

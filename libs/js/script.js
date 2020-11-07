@@ -2,6 +2,7 @@ let countryMarker;
 let wikiMarkers;
 let weatherMarker;
 let border;
+
 const mymap = L.map('mapid').setView([0, 0], 6);
 
 const OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -9,17 +10,48 @@ const OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}
 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(mymap);
 
-$(document).ready(function() {
+const LeafIcon = L.Icon.extend({
+  options: {
+    iconSize: [50, 50]
+  }
+})
 
+$(document).ready(function() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
-      userPosLat = position.coords.latitude;
-      userPosLng = position.coords.longitude;
-      mymap.setView([userPosLat, userPosLng]);
+      const userPosLat = position.coords.latitude;
+      const userPosLng = position.coords.longitude;
+      console.log(userPosLat);
+
+      console.log(userPosLng);
+
+
+      $.ajax({
+        url: "libs/php/getUserCountry.php",
+        type: 'POST',
+        dataType: 'json',
+        data: {
+          userLat: userPosLat,
+          userLng: userPosLng,
+        },
+        
+        success: function(result) {
+      
+         console.log(result['data']);
+         $('#country-select').val(result['data']);
+         $('#country-select').trigger("change");
+    
+      
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+          console.log(textStatus);
+          console.log(errorThrown);
+          console.log(jqXHR);
+        }
+      }); 
+      
     })
   }
-
-  
   $.ajax({
     url: "libs/php/ISOCode.php",
     type: 'POST',
@@ -77,14 +109,16 @@ $('#country-select').on('change', function() {
                             <ul>`
 
        // go to relevant lat and lng
-      mymap.flyTo([countryLat, countryLng], 4);
 
       if(mymap.hasLayer(countryMarker)) {
         mymap.removeLayer(countryMarker);
       };
+
+
+      const countryMarkerIcon = new LeafIcon({iconUrl: 'imgs/red-icon.png'});
       
       // Country Marker
-      countryMarker = L.marker([countryLat,countryLng],)
+      countryMarker = L.marker([countryLat,countryLng], {icon: countryMarkerIcon})
                                 .addTo(mymap);
 
       countryMarker.bindPopup(countryInfoHTML);
@@ -94,7 +128,10 @@ $('#country-select').on('change', function() {
         mymap.removeLayer(weatherMarker);
       };
 
-      weatherMarker = L.marker([weatherLat, weatherLng]).addTo(mymap);
+      const weatherMarkerIcon = new LeafIcon({iconUrl: 'imgs/blue-icon.png'});
+
+
+      weatherMarker = L.marker([weatherLat, weatherLng], {icon: weatherMarkerIcon}).addTo(mymap);
 
       const capitalWeatherHTML = `<h2>${capitalWeather['name']}</h2>
                                   <ul>
@@ -113,12 +150,14 @@ $('#country-select').on('change', function() {
       }
 
       wikiMarkers = L.markerClusterGroup();
+      const wikiMarkerIcon = new LeafIcon({iconUrl: 'imgs/green-icon.png'});
+
 
       capitalWiki.forEach(element => {
         const wikiHTML = `${element.summary}
                           <a href="https://${element.wikipediaUrl}">Read more...</a>
                           `;
-        wikiMarker = L.marker([element.lat, element.lng]);
+        wikiMarker = L.marker([element.lat, element.lng], {icon: wikiMarkerIcon});
         wikiMarker.bindPopup(wikiHTML);
 
         wikiMarkers.addLayer(wikiMarker);
@@ -154,13 +193,14 @@ $('#country-select').on('change', function() {
 
 
     border = L.geoJSON(result['data'], {
-        style: function (feature) {
-          return {opacity: 1, color: '#8AC0DE'}
+        style: function () {
+          return {opacity: 1, color: '#67B26F'}
       }});
 
     // Zoom and fit the map edge around it
-    mymap.fitBounds(border.getBounds());
     border.addTo(mymap);
+    mymap.fitBounds(border.getBounds());
+
   
     },
     error: function(jqXHR, textStatus, errorThrown) {
