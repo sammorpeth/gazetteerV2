@@ -4,17 +4,7 @@
   
   // Rest Countries - Country Info
   $infoUrl='https://restcountries.eu/rest/v2/alpha?codes=' . $_REQUEST['countryCode'];
-  // $infoUrl='https://restcountries.eu/rest/v2/alpha?codes=GB';
-
-  // flickr api key
-//   d05256dfd2c01b4b9a532e1a8a15ba47
-
-// Secret:
-// 595c7987bb0fe5ef
-
-// Edit app details - Edit auth flow for this app - View all Apps by You
-
-
+  // $infoUrl='https://restcountries.eu/rest/v2/alpha?codes=JP';
 
 	$ch1 = curl_init();
 	curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, false);
@@ -79,13 +69,11 @@
 
   curl_close($ch3);
 
-  // $currencyUrl = 'https://v2.api.forex/infos/currency/GBP.json';
-
-
   // $flickrKey = 'd05256dfd2c01b4b9a532e1a8a15ba47';
   // $flickrUrl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' . $flickrKey.'&lat=55&lon=-1.6&per_page=10&format=json';
 
   $newsKey = 'a920f9bb0b2f438ea92c53fa19f9a2d9';
+  // $newsUrl = 'https://newsapi.org/v2/top-headlines?country=GB&apiKey=a920f9bb0b2f438ea92c53fa19f9a2d9&pageSize=5';
   $newsUrl = 'https://newsapi.org/v2/top-headlines?country='. $_REQUEST['countryCode'].'&apiKey=a920f9bb0b2f438ea92c53fa19f9a2d9&pageSize=5';
 
   $ch4 = curl_init();
@@ -99,6 +87,26 @@
   $output['data']['news'] = $newsDecode; 
 
   curl_close($ch4);
+  
+  $countryCurrencyCode = $output['data'][0]['currencies'][0]['code'];
+  $forexKey = 'ea1848fa-ca80-4ada-9cf9-3390bc72f3c8';
+
+  $conversionUSDUrl = 'https://v2.api.forex/historics/USD-' . $countryCurrencyCode .'.json?key=' . $forexKey;
+
+  $ch5 = curl_init();
+	curl_setopt($ch5, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch5, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch5, CURLOPT_URL,$conversionUSDUrl);
+
+  $conversionUSDInfo = curl_exec($ch5);
+  $conversionUSDDecode = json_decode($conversionUSDInfo,true);
+
+
+
+  $output['data']['conversionUSD'] = $conversionUSDDecode['historics']; 
+
+  curl_close($ch5);
+
 
   header('Content-Type: application/json; charset=UTF-8');
 	

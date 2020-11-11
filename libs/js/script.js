@@ -87,7 +87,7 @@ $('#country-select').on('change', function() {
     },
     
     success: function(result) {
-    // console.log(result['data']);
+    console.log(result['data']);
       // console.log($('#country-select').val());
    
       const selectedCountry = result['data'];
