@@ -15,7 +15,9 @@ li {
   list-style-type: none;
 }
 
-
+.test {
+  background: green;
+}
 
 #mapid {
   height: calc(100vh - 60px);
@@ -28,4 +30,9 @@ li {
   width: 100%;
   -webkit-box-shadow: 0px 10px 13px -7px #000000, 8px 9px 0px 4px rgba(0,0,0,0); 
   box-shadow: 0px 10px 13px -7px #000000, 8px 9px 0px 4px rgba(0,0,0,0);
+}
+
+.news-img {
+  border-radius: 5px;
+  margin-bottom: 1em;
 }
