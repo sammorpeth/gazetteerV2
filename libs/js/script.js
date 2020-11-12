@@ -94,17 +94,23 @@ $('#country-select').on('change', function() {
       // set country's lat and lng
       const countryLat = selectedCountry[0]['latlng'][0];
       const countryLng = selectedCountry[0]['latlng'][1];
+
       const weatherLat = selectedCountry['capitalWeather']['coord']['lat'];
       const weatherLng = selectedCountry['capitalWeather']['coord']['lon'];
       const capitalWiki = selectedCountry['capitalWiki'];
+
       const capitalWeather = selectedCountry['capitalWeather'];
+
       const countryNews = selectedCountry['news']['articles'];
-      console.log(countryNews);
-
-
-     
+    
+      const todaysDate = new Date().toISOString().slice(0,10);
+      const todaysExchange = selectedCountry['conversionUSD'][todaysDate];
+      const countryCurrency = selectedCountry[0]['currencies'][0]['name'];
+      const countryCurrencySymbol = selectedCountry[0]['currencies'][0]['symbol'];
+      const countryCurrencyCode = selectedCountry[0]['currencies'][0]['code'];
+      console.log(todaysExchange);
       
-      const countryInfoHTML = `<h2>${selectedCountry[0]['name']}</h2>
+      const countryInfoHTML = `<h3>${selectedCountry[0]['name']}</h3>
                             <ul class="country-info">
                               <li>Region: ${selectedCountry[0]['region']}</li>
                               <li>Subregion: ${selectedCountry[0]['subregion']}</li>
@@ -120,14 +126,13 @@ $('#country-select').on('change', function() {
         mymap.removeLayer(countryMarker);
       };
 
+      const countryPopup = L.popup()
+            .setLatLng([countryLat, countryLng])
+            .setContent(countryInfoHTML)
+            .openOn(mymap);
 
-      const countryMarkerIcon = new LeafIcon({iconUrl: 'imgs/red-icon.png'});
+      border.bindPopup(countryPopup);
       
-      // Country Marker
-      countryMarker = L.marker([countryLat,countryLng], {icon: countryMarkerIcon})
-                                .addTo(mymap);
-
-      countryMarker.bindPopup(countryInfoHTML);
 
       // Weather Marker
       if(mymap.hasLayer(weatherMarker)) {
@@ -176,13 +181,13 @@ $('#country-select').on('change', function() {
       // Build HTML for news
 
       // Set a dummy item
-      let newsHTML = `<div class="carousel-item">
-    </div>`;
+      let newsHTML = `<div class="carousel-item"></div>`;
+                     
 
    
       if(countryNews.length === 0) {
          // Default HTML for most countries
-        newsHTML = `It looks like we can't get any news for your chosen country. Please choose a country from the list below:...`
+        newsHTML = `<h4>It seems we can't get any news for your chosen country. Please choose a different country.</h4>`
       } else {
         countryNews.forEach(article => {
           newsHTML +=  `<div class="carousel-item">
@@ -208,6 +213,20 @@ $('#country-select').on('change', function() {
       // Add active class to first item to make it appear
       $('#news-items div:nth-of-type(2)').addClass('active');
      
+      // Forex Info
+      const forexMarkerIcon = new LeafIcon({iconUrl: 'imgs/icons8-money-64.png'});
+
+      const forexMarker = L.marker([countryLat, countryLng], {icon: forexMarkerIcon}).addTo(mymap);
+      const forexHTML = `<h3>Forex Information</h3>
+                          <p>1 USD equals ${todaysExchange.close} ${countryCurrencyCode}</p>
+                          <ul>
+                            <li>Close: ${todaysExchange.close}</li>
+                            <li>Open: ${todaysExchange.open}</li>
+                            <li>High: ${todaysExchange.high}</li>
+                            <li>Low: ${todaysExchange.low}</li>
+                          </ul>
+                          `;
+      forexMarker.bindPopup(forexHTML);
 
 
     },

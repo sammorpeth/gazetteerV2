@@ -2502,9 +2502,12 @@ fieldset:disabled a.btn {
 }
 
 .btn-primary {
-  color: #fff;
-  background-color: #007bff;
-  border-color: #007bff;
+  margin-left: .5em;
+  margin-right: .5em;
+  margin-bottom: 1em;
+  color: #000;
+  background-color: #fff;
+  border-color: #fff;
 }
 
 .btn-primary:hover {
