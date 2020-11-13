@@ -2,6 +2,7 @@ let countryMarker;
 let wikiMarkers;
 let weatherMarker;
 let border;
+let forexMarker;
 
 const mymap = L.map('mapid').setView([0, 0], 6);
 
@@ -9,6 +10,12 @@ const OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}
 	maxZoom: 19,
 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(mymap);
+
+const removeMarker = (typeOfMarker) => {
+  if(mymap.hasLayer(typeOfMarker)) {
+    mymap.removeLayer(typeOfMarker);
+  };
+}
 
 const LeafIcon = L.Icon.extend({
   options: {
@@ -21,9 +28,7 @@ $(document).ready(function() {
     navigator.geolocation.getCurrentPosition(function(position) {
       const userPosLat = position.coords.latitude;
       const userPosLng = position.coords.longitude;
-      console.log(userPosLat);
 
-      console.log(userPosLng);
 
 
       $.ajax({
@@ -37,7 +42,7 @@ $(document).ready(function() {
         
         success: function(result) {
       
-         console.log(result['data']);
+        //  console.log(result['data']);
          $('#country-select').val(result['data']);
          $('#country-select').trigger("change");
     
@@ -88,7 +93,6 @@ $('#country-select').on('change', function() {
     
     success: function(result) {
     console.log(result['data']);
-      // console.log($('#country-select').val());
    
       const selectedCountry = result['data'];
       // set country's lat and lng
@@ -105,10 +109,9 @@ $('#country-select').on('change', function() {
     
       const todaysDate = new Date().toISOString().slice(0,10);
       const todaysExchange = selectedCountry['conversionUSD'][todaysDate];
-      const countryCurrency = selectedCountry[0]['currencies'][0]['name'];
-      const countryCurrencySymbol = selectedCountry[0]['currencies'][0]['symbol'];
       const countryCurrencyCode = selectedCountry[0]['currencies'][0]['code'];
-      console.log(todaysExchange);
+
+      const covidStats = selectedCountry['coronaStats'];
       
       const countryInfoHTML = `<h3>${selectedCountry[0]['name']}</h3>
                             <ul class="country-info">
@@ -122,10 +125,6 @@ $('#country-select').on('change', function() {
 
        // go to relevant lat and lng
 
-      if(mymap.hasLayer(countryMarker)) {
-        mymap.removeLayer(countryMarker);
-      };
-
       const countryPopup = L.popup()
             .setLatLng([countryLat, countryLng])
             .setContent(countryInfoHTML)
@@ -135,9 +134,8 @@ $('#country-select').on('change', function() {
       
 
       // Weather Marker
-      if(mymap.hasLayer(weatherMarker)) {
-        mymap.removeLayer(weatherMarker);
-      };
+      removeMarker(weatherMarker);
+   
 
       const weatherMarkerIcon = new LeafIcon({iconUrl: 'imgs/blue-icon.png'});
 
@@ -156,9 +154,8 @@ $('#country-select').on('change', function() {
       weatherMarker.bindPopup(capitalWeatherHTML);
 
       // Wiki Marker Clusters
-      if(mymap.hasLayer(wikiMarkers)) {
-        mymap.removeLayer(wikiMarkers);
-      }
+      removeMarker(wikiMarkers);
+
 
       wikiMarkers = L.markerClusterGroup();
       const wikiMarkerIcon = new LeafIcon({iconUrl: 'imgs/green-icon.png'});
@@ -214,9 +211,12 @@ $('#country-select').on('change', function() {
       $('#news-items div:nth-of-type(2)').addClass('active');
      
       // Forex Info
+      if(mymap.hasLayer(forexMarker)) {
+        mymap.removeLayer(forexMarker);
+      }
       const forexMarkerIcon = new LeafIcon({iconUrl: 'imgs/icons8-money-64.png'});
 
-      const forexMarker = L.marker([countryLat, countryLng], {icon: forexMarkerIcon}).addTo(mymap);
+      forexMarker = L.marker([countryLat, countryLng], {icon: forexMarkerIcon}).addTo(mymap);
       const forexHTML = `<h3>Forex Information</h3>
                           <p>1 USD equals ${todaysExchange.close} ${countryCurrencyCode}</p>
                           <ul>
@@ -264,6 +264,78 @@ $('#country-select').on('change', function() {
     border.addTo(mymap);
     mymap.fitBounds(border.getBounds());
 
+  
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(textStatus);
+      console.log(errorThrown);
+      console.log(jqXHR);
+    }
+  }); 
+});
+
+$('#country-select').on('change', function() {
+  $.ajax({
+    url: "libs/php/countryBorders.php",
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      countryCode: $('#country-select').val()
+    },
+    
+    success: function(result) {
+    
+    // Check if there's a previous border, if so remove it.
+    if(mymap.hasLayer(border)) {
+      mymap.removeLayer(border);
+    };
+
+
+    border = L.geoJSON(result['data'], {
+        style: function () {
+          return {opacity: 1, color: '#67B26F'}
+      }});
+
+    // Zoom and fit the map edge around it
+    border.addTo(mymap);
+    mymap.fitBounds(border.getBounds());
+
+  
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(textStatus);
+      console.log(errorThrown);
+      console.log(jqXHR);
+    }
+  }); 
+});
+
+$('#coronaModal').click(function() {
+  $.ajax({
+    url: "libs/php/covidStats.php",
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      countryCode: $('#country-select').val()
+    },
+    
+    success: function(result) {
+      console.log($('#country-select').val())
+      const country = result;
+    
+      const coronaHTML = `<h2>${country.Country}</h2>
+                          <ul>
+                            <li>Date: ${country.Date}</li>
+                            <li>Confirmed today: ${country.NewConfirmed}</li>
+                            <li>Deaths today: ${country.NewDeaths}</li>
+                            <li>Recovered today: ${country.NewRecovered}</li>
+                            <li>Total Confirmed cases: ${country.TotalConfirmed}</li>
+                            <li>Total Confirmed deaths: ${country.TotalDeaths}</li>
+                            <li>Total Confirmed recovered: ${country.TotalRecovered}</li>
+                          </ul>
+                            `;
+
+      $('#corona-stats').html(coronaHTML);
   
     },
     error: function(jqXHR, textStatus, errorThrown) {

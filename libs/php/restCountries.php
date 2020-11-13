@@ -101,11 +101,22 @@
   $conversionUSDInfo = curl_exec($ch5);
   $conversionUSDDecode = json_decode($conversionUSDInfo,true);
 
-
-
   $output['data']['conversionUSD'] = $conversionUSDDecode['historics']; 
-
   curl_close($ch5);
+
+  $todaysDate = date("Y-m-d");
+  $coronaUrl = 'https://api.covid19api.com/country/south-africa/status/confirmed?from='. $todaysDate.'T00:00:00Z&to=' . $todaysDate .'T00:00:00Z';
+
+  $ch6 = curl_init();
+	curl_setopt($ch6, CURLOPT_SSL_VERIFYPEER, false);
+	curl_setopt($ch6, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch6, CURLOPT_URL,$coronaUrl);
+
+  $coronaInfo = curl_exec($ch6);
+  $coronaInfoDecode = json_decode($coronaInfo,true);
+
+  $output['data']['coronaStats'] = $coronaInfoDecode; 
+  curl_close($ch6);
 
 
   header('Content-Type: application/json; charset=UTF-8');

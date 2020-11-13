@@ -41,7 +41,8 @@
           <select class="custom-select" id="country-select">
           </select>
         </div>
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModalCenter">News</button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#newsModal">News</button>
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#coronaModal">COVID-19</button>
       </nav>
    
     </div>
@@ -49,8 +50,8 @@
 
   <div id="mapid">
   
-  <!-- Modal -->
-  <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <!-- News Modal -->
+  <div class="modal fade" id="newsModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
       <div class="modal-content">
         <div class="modal-header">
@@ -79,10 +80,30 @@
               </div>
           </div>
         </div>
-     
       </div>
-    </div></div>
+    </div>
+  </div>
+</div>
+
+  <!--/.News Modal -->
   
+  <!-- Corona Modal -->
+  <div class="modal fade" id="coronaModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">COVID-19 Stats</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body" id="corona-stats">
+          
+        </div>
+       
+      </div>
+    </div>
+  </div>
   
 
   <footer class="mastfoot mt-auto">
@@ -98,6 +119,5 @@
   <script src="libs/js/leaflet.js"></script>
   <script src="libs/js/leaflet.markercluster.js"></script>
   <script src="libs/js/script.js"></script>
-</div>
 </body>
 </html>
