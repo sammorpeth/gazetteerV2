@@ -42,3 +42,8 @@ li {
   display: flex;
   justify-content: space-around;
 }
+
+#from-climate,
+#to-climate {
+  background: grey;
+}

@@ -117,11 +117,25 @@
           </button>
         </div>
         <div class="modal-body" id="climate-change-stats">
-          <div id="past-stats"></div>
-          <div id="future-stats"></div>
+          <div id="past-climate"></div>
+          <div id="future-climate"></div>
           
         </div>
-       
+        <div class="modal-footer">
+          <select class="custom-select" id="climate-select-past">
+            <option val="1920" data-past-to="1939">1920-1939</option>
+            <option val="1940" data-past-to="1959">1940-1959</option>
+            <option>1960-1979</option>
+            <option>1980-1999</option>
+          </select>
+          <select class="custom-select" id="climate-select-future">
+            <option>2020-2039</option>
+            <option>2040-2059</option>
+            <option>2060-2079</option>
+            <option>2080-2099</option>
+          </select>
+        </div>
+       <span>Statistics provided by the World Bank.</span>
       </div>
     </div>
   </div>

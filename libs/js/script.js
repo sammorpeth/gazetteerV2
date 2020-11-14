@@ -25,11 +25,11 @@ const roundTempsDown = (arr) => {
   return roundedTemps;
 }
 
-const formatMonths = (arr, year) => {
+const formatMonths = (arr, fromYear, toYear) => {
   const monthsArr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   const combined = monthsArr.map((val, idx) => `<li>${val} - ${arr[idx]}</li>`);
-  climateHTML = `<h3>${year}</h3>
+  climateHTML = `<h3>${fromYear} -  ${toYear}</h3>
                   <ul>`;
   combined.forEach(dataPoint => {
     climateHTML += dataPoint;
@@ -138,12 +138,13 @@ $('#country-select').on('change', function() {
       const covidStats = selectedCountry['covidStats'];
 
       const avgPastTemps = selectedCountry['pastAvgMonthlyTemps'][0]['monthVals'];
-      const avgFutureTemps = selectedCountry['futureAvgMonthlyTemps'][0]['monthVals'];
       const avgPastTempsFromYear = selectedCountry['pastAvgMonthlyTemps'][0]['fromYear'];
       const avgPastTempsToYear = selectedCountry['pastAvgMonthlyTemps'][0]['toYear'];
 
-      
-      
+      const avgFutureTemps = selectedCountry['futureAvgMonthlyTemps'][0]['monthVals'];
+      const avgFutureTempsFromYear = selectedCountry['futureAvgMonthlyTemps'][0]['fromYear'];
+      const avgFutureTempsToYear = selectedCountry['futureAvgMonthlyTemps'][0]['toYear'];
+
       const countryInfoHTML = `<h3>${selectedCountry[0]['name']}</h3>
                             <ul class="country-info">
                               <li>Region: ${selectedCountry[0]['region']}</li>
@@ -279,17 +280,17 @@ $('#country-select').on('change', function() {
       $('#corona-stats').html(covidHTML);
 
       // Climate Change info
-      $('#climateChangeTitle').html(`Climate Change from ${avgPastTempsFromYear} to ${avgPastTempsToYear}`);
+      $('#climateChangeTitle').html(`Monthly averages of temperature in Celsius`);
 
       const roundedPastTemps = roundTempsDown(avgPastTemps);
       const roundedFutureTemps = roundTempsDown(avgFutureTemps);
      
 
-      const pastTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear);
-      const futureTempsHTML = formatMonths(roundedFutureTemps, avgPastTempsToYear);
+      const avgFromTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear, avgPastTempsToYear);
+      const avgToTempsHTML = formatMonths(roundedFutureTemps, avgFutureTempsFromYear, avgFutureTempsToYear);
 
-      $('#past-stats').html(pastTempsHTML);
-      $('#future-stats').html(futureTempsHTML);
+      $('#past-climate').html(avgFromTempsHTML);
+      $('#future-climate').html(avgToTempsHTML);
 
 
     },
@@ -372,3 +373,30 @@ $('#country-select').on('change', function() {
     }
   }); 
 });
+
+
+$('#climate-select-past').on('change', function() {
+  
+  $.ajax({
+    url: "libs/php/climateChange.php",
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      fromClimateFuture: $('#climate-select-past').val(),
+      toClimateFuture: $('#climate-select-past').data('past-to')
+    },
+    
+    success: function(result) {
+  
+     console.log(result['data']);
+  
+
+  
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(textStatus);
+      console.log(errorThrown);
+      console.log(jqXHR);
+    }
+  }); 
+})
