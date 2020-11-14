@@ -4,7 +4,7 @@
   
   // Rest Countries - Country Info
   $infoUrl='https://restcountries.eu/rest/v2/alpha?codes=' . $_REQUEST['countryCode'];
-  // $infoUrl='https://restcountries.eu/rest/v2/alpha?codes=JP';
+  // $infoUrl='https://restcountries.eu/rest/v2/alpha?codes=GB';
 
 	$ch1 = curl_init();
 	curl_setopt($ch1, CURLOPT_SSL_VERIFYPEER, false);
@@ -47,9 +47,6 @@
 
   // ea1848fa-ca80-4ada-9cf9-3390bc72f3c8
 
-  
-
-
   $capitalLat = $output['data']['capitalWeather']['coord']['lat'];
   $capitalLng = $output['data']['capitalWeather']['coord']['lon'];
 
@@ -87,7 +84,8 @@
   $output['data']['news'] = $newsDecode; 
 
   curl_close($ch4);
-  
+
+  // Forex API
   $countryCurrencyCode = $output['data'][0]['currencies'][0]['code'];
   $forexKey = 'ea1848fa-ca80-4ada-9cf9-3390bc72f3c8';
 
@@ -104,19 +102,56 @@
   $output['data']['conversionUSD'] = $conversionUSDDecode['historics']; 
   curl_close($ch5);
 
-  $todaysDate = date("Y-m-d");
-  $coronaUrl = 'https://api.covid19api.com/country/south-africa/status/confirmed?from='. $todaysDate.'T00:00:00Z&to=' . $todaysDate .'T00:00:00Z';
+  // Corona API
+  $coronaUrl='https://api.covid19api.com/summary';
 
   $ch6 = curl_init();
-	curl_setopt($ch6, CURLOPT_SSL_VERIFYPEER, false);
-	curl_setopt($ch6, CURLOPT_RETURNTRANSFER, true);
-	curl_setopt($ch6, CURLOPT_URL,$coronaUrl);
+  curl_setopt($ch6, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch6, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch6, CURLOPT_URL,$coronaUrl);
 
   $coronaInfo = curl_exec($ch6);
   $coronaInfoDecode = json_decode($coronaInfo,true);
 
-  $output['data']['coronaStats'] = $coronaInfoDecode; 
+  $coronaInfoDecode['Countries']; 
   curl_close($ch6);
+
+  foreach ($coronaInfoDecode['Countries'] as $country) {
+    if($country['CountryCode'] == 'GB') {
+      $matchedStats = $country;
+    }
+  }
+
+  $output['data']['covidStats'] = $matchedStats;
+
+
+  // Past monthly temperature averages API
+  $avgPastMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/1960/1979/GBR.json';
+
+  $ch7 = curl_init();
+  curl_setopt($ch7, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch7, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch7, CURLOPT_URL,$avgPastMonthlyTempsUrl);
+
+  $avgPastMonthlyTempsInfo = curl_exec($ch7);
+  $avgPastMonthlyTempsDecode = json_decode($avgPastMonthlyTempsInfo,true);
+
+  $output['data']['pastAvgMonthlyTemps'] = $avgPastMonthlyTempsDecode;
+  curl_close($ch7);
+
+   // Future monthly temperature averages API
+   $avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/2060/2079/GBR.json';
+
+   $ch8 = curl_init();
+   curl_setopt($ch8, CURLOPT_SSL_VERIFYPEER, false);
+   curl_setopt($ch8, CURLOPT_RETURNTRANSFER, true);
+   curl_setopt($ch8, CURLOPT_URL,$avgFutureMonthlyTempsUrl);
+ 
+   $avgFutureMonthlyTempsInfo = curl_exec($ch8);
+   $avgFutureMonthlyTempsDecode = json_decode($avgFutureMonthlyTempsInfo,true);
+ 
+   $output['data']['futureAvgMonthlyTemps'] = $avgFutureMonthlyTempsDecode;
+   curl_close($ch8);
 
 
   header('Content-Type: application/json; charset=UTF-8');

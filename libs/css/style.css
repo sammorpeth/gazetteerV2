@@ -37,3 +37,8 @@ li {
   border-radius: 5px;
   margin-bottom: 1em;
 }
+
+#climate-change-stats {
+  display: flex;
+  justify-content: space-around;
+}

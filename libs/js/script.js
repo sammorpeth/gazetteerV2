@@ -17,6 +17,29 @@ const removeMarker = (typeOfMarker) => {
   };
 }
 
+const roundTempsDown = (arr) => {
+  const roundedTemps = arr.map(element => {
+    return element.toFixed(1);
+   
+  })
+  return roundedTemps;
+}
+
+const formatMonths = (arr, year) => {
+  const monthsArr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  const combined = monthsArr.map((val, idx) => `<li>${val} - ${arr[idx]}</li>`);
+  climateHTML = `<h3>${year}</h3>
+                  <ul>`;
+  combined.forEach(dataPoint => {
+    climateHTML += dataPoint;
+  })
+
+  climateHTML += `</ul>`;
+  return climateHTML;
+}
+
+
 const LeafIcon = L.Icon.extend({
   options: {
     iconSize: [50, 50]
@@ -98,6 +121,7 @@ $('#country-select').on('change', function() {
       // set country's lat and lng
       const countryLat = selectedCountry[0]['latlng'][0];
       const countryLng = selectedCountry[0]['latlng'][1];
+      const countryName = selectedCountry[0]['name'];
 
       const weatherLat = selectedCountry['capitalWeather']['coord']['lat'];
       const weatherLng = selectedCountry['capitalWeather']['coord']['lon'];
@@ -111,7 +135,14 @@ $('#country-select').on('change', function() {
       const todaysExchange = selectedCountry['conversionUSD'][todaysDate];
       const countryCurrencyCode = selectedCountry[0]['currencies'][0]['code'];
 
-      const covidStats = selectedCountry['coronaStats'];
+      const covidStats = selectedCountry['covidStats'];
+
+      const avgPastTemps = selectedCountry['pastAvgMonthlyTemps'][0]['monthVals'];
+      const avgFutureTemps = selectedCountry['futureAvgMonthlyTemps'][0]['monthVals'];
+      const avgPastTempsFromYear = selectedCountry['pastAvgMonthlyTemps'][0]['fromYear'];
+      const avgPastTempsToYear = selectedCountry['pastAvgMonthlyTemps'][0]['toYear'];
+
+      
       
       const countryInfoHTML = `<h3>${selectedCountry[0]['name']}</h3>
                             <ul class="country-info">
@@ -172,15 +203,11 @@ $('#country-select').on('change', function() {
       })
 
       mymap.addLayer(wikiMarkers);
-
-      // News modal
-
-      // Build HTML for news
-
+      
+      // News Info
       // Set a dummy item
       let newsHTML = `<div class="carousel-item"></div>`;
                      
-
    
       if(countryNews.length === 0) {
          // Default HTML for most countries
@@ -210,23 +237,59 @@ $('#country-select').on('change', function() {
       // Add active class to first item to make it appear
       $('#news-items div:nth-of-type(2)').addClass('active');
      
-      // Forex Info
+      // Forex info
       if(mymap.hasLayer(forexMarker)) {
         mymap.removeLayer(forexMarker);
       }
       const forexMarkerIcon = new LeafIcon({iconUrl: 'imgs/icons8-money-64.png'});
 
+      let forexHTML;
       forexMarker = L.marker([countryLat, countryLng], {icon: forexMarkerIcon}).addTo(mymap);
-      const forexHTML = `<h3>Forex Information</h3>
-                          <p>1 USD equals ${todaysExchange.close} ${countryCurrencyCode}</p>
-                          <ul>
-                            <li>Close: ${todaysExchange.close}</li>
-                            <li>Open: ${todaysExchange.open}</li>
-                            <li>High: ${todaysExchange.high}</li>
-                            <li>Low: ${todaysExchange.low}</li>
-                          </ul>
-                          `;
+      
+      if (todaysExchange) {
+         forexHTML = `<h3>Forex Information</h3>
+        <p>1 USD equals ${todaysExchange.close} ${countryCurrencyCode}</p>
+        <ul>
+          <li>Close: ${todaysExchange.close}</li>
+          <li>Open: ${todaysExchange.open}</li>
+          <li>High: ${todaysExchange.high}</li>
+          <li>Low: ${todaysExchange.low}</li>
+        </ul>
+        `;
+        
+      } else {
+        forexHTML = `<p>Please check back later for Forex information</p>`;
+      }
+     
       forexMarker.bindPopup(forexHTML);
+
+      // Covid info
+      const covidHTML = `<h2>${covidStats.Country}</h2>
+      <ul>
+        <li>Date: ${covidStats.Date}</li>
+        <li>Confirmed today: ${covidStats.NewConfirmed}</li>
+        <li>Deaths today: ${covidStats.NewDeaths}</li>
+        <li>Recovered today: ${covidStats.NewRecovered}</li>
+        <li>Total Confirmed cases: ${covidStats.TotalConfirmed}</li>
+        <li>Total Confirmed deaths: ${covidStats.TotalDeaths}</li>
+        <li>Total Confirmed recovered: ${covidStats.TotalRecovered}</li>
+      </ul>
+        `;
+
+      $('#corona-stats').html(covidHTML);
+
+      // Climate Change info
+      $('#climateChangeTitle').html(`Climate Change from ${avgPastTempsFromYear} to ${avgPastTempsToYear}`);
+
+      const roundedPastTemps = roundTempsDown(avgPastTemps);
+      const roundedFutureTemps = roundTempsDown(avgFutureTemps);
+     
+
+      const pastTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear);
+      const futureTempsHTML = formatMonths(roundedFutureTemps, avgPastTempsToYear);
+
+      $('#past-stats').html(pastTempsHTML);
+      $('#future-stats').html(futureTempsHTML);
 
 
     },
@@ -300,42 +363,6 @@ $('#country-select').on('change', function() {
     border.addTo(mymap);
     mymap.fitBounds(border.getBounds());
 
-  
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus);
-      console.log(errorThrown);
-      console.log(jqXHR);
-    }
-  }); 
-});
-
-$('#coronaModal').click(function() {
-  $.ajax({
-    url: "libs/php/covidStats.php",
-    type: 'POST',
-    dataType: 'json',
-    data: {
-      countryCode: $('#country-select').val()
-    },
-    
-    success: function(result) {
-      console.log($('#country-select').val())
-      const country = result;
-    
-      const coronaHTML = `<h2>${country.Country}</h2>
-                          <ul>
-                            <li>Date: ${country.Date}</li>
-                            <li>Confirmed today: ${country.NewConfirmed}</li>
-                            <li>Deaths today: ${country.NewDeaths}</li>
-                            <li>Recovered today: ${country.NewRecovered}</li>
-                            <li>Total Confirmed cases: ${country.TotalConfirmed}</li>
-                            <li>Total Confirmed deaths: ${country.TotalDeaths}</li>
-                            <li>Total Confirmed recovered: ${country.TotalRecovered}</li>
-                          </ul>
-                            `;
-
-      $('#corona-stats').html(coronaHTML);
   
     },
     error: function(jqXHR, textStatus, errorThrown) {
