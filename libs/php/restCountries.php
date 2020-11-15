@@ -22,6 +22,8 @@
 	$output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
   $output['data'] = $decode;
 
+  $alpha3Code = $output['data'][0]['alpha3Code'];
+
   // Set country's lat and lng
   
   $countryLat = $output['data'][0]['latlng'][0];
@@ -126,7 +128,7 @@
 
 
   // Past monthly temperature averages API
-  $avgPastMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/1920/1939/GBR.json';
+  $avgPastMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/1920/1939/'. $alpha3Code.'.json';
 
   $ch7 = curl_init();
   curl_setopt($ch7, CURLOPT_SSL_VERIFYPEER, false);
@@ -140,7 +142,7 @@
   curl_close($ch7);
 
    // Future monthly temperature averages API
-   $avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/2020/2039/GBR.json';
+   $avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/2020/2039/'. $alpha3Code.'.json';
 
    $ch8 = curl_init();
    curl_setopt($ch8, CURLOPT_SSL_VERIFYPEER, false);

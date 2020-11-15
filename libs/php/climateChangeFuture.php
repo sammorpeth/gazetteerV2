@@ -10,7 +10,8 @@ $toYear = $exploded_value[1];
 
 
 // $avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/2020/2039/GBR.json';
-$avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/' . $fromYear.'/' . $toYear .'/GBR.json';
+$avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/' . $fromYear.'/' . $toYear .'/'
+. $_REQUEST['countryCode'].'.json';
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);

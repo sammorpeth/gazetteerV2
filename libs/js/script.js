@@ -125,6 +125,8 @@ $('#country-select').on('change', function() {
       const countryLat = selectedCountry[0]['latlng'][0];
       const countryLng = selectedCountry[0]['latlng'][1];
       const countryName = selectedCountry[0]['name'];
+      const countryIso3 = selectedCountry[0]['alpha3Code'];
+      console.log(countryIso3);
 
       const weatherLat = selectedCountry['capitalWeather']['coord']['lat'];
       const weatherLng = selectedCountry['capitalWeather']['coord']['lon'];
@@ -292,6 +294,13 @@ $('#country-select').on('change', function() {
       const avgFromTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear, avgPastTempsToYear);
       const avgToTempsHTML = formatMonths(roundedFutureTemps, avgFutureTempsFromYear, avgFutureTempsToYear);
 
+      // Add value so the API can be called through climateChangeFuture.php etc.
+      $('#climate-country-code').append($('<option>', {
+        value: countryIso3,
+        text: countryIso3
+      }));
+     
+
       $('#past-climate').html(avgFromTempsHTML);
       $('#future-climate').html(avgToTempsHTML);
 
@@ -387,6 +396,7 @@ $('#climate-select-future').on('change', function() {
     type: 'POST',
     dataType: 'json',
     data: {
+      countryCode: $('#climate-country-code').val(),
       climateFutureYears: $('#climate-select-future').val(),
     },
     
@@ -421,6 +431,7 @@ $('#climate-select-past').on('change', function() {
     type: 'POST',
     dataType: 'json',
     data: {
+      countryCode: $('#climate-country-code').val(),
       climatePastYears: $('#climate-select-past').val(),
     },
     
