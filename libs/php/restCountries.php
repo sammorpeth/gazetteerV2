@@ -126,7 +126,7 @@
 
 
   // Past monthly temperature averages API
-  $avgPastMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/1960/1979/GBR.json';
+  $avgPastMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/1920/1939/GBR.json';
 
   $ch7 = curl_init();
   curl_setopt($ch7, CURLOPT_SSL_VERIFYPEER, false);
@@ -140,7 +140,7 @@
   curl_close($ch7);
 
    // Future monthly temperature averages API
-   $avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/2060/2079/GBR.json';
+   $avgFutureMonthlyTempsUrl = 'http://climatedataapi.worldbank.org/climateweb/rest/v1/country/mavg/bccr_bcm2_0/tas/2020/2039/GBR.json';
 
    $ch8 = curl_init();
    curl_setopt($ch8, CURLOPT_SSL_VERIFYPEER, false);

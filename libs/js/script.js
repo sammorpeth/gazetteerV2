@@ -47,6 +47,9 @@ const LeafIcon = L.Icon.extend({
 })
 
 $(document).ready(function() {
+
+  
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
       const userPosLat = position.coords.latitude;
@@ -280,7 +283,7 @@ $('#country-select').on('change', function() {
       $('#corona-stats').html(covidHTML);
 
       // Climate Change info
-      $('#climateChangeTitle').html(`Monthly averages of temperature in Celsius`);
+      $('#climateChangeTitle').html(`Monthly temperature averages in Celsius`);
 
       const roundedPastTemps = roundTempsDown(avgPastTemps);
       const roundedFutureTemps = roundTempsDown(avgFutureTemps);
@@ -375,20 +378,66 @@ $('#country-select').on('change', function() {
 });
 
 
-$('#climate-select-past').on('change', function() {
+
+
+$('#climate-select-future').on('change', function() {
   
   $.ajax({
-    url: "libs/php/climateChange.php",
+    url: "libs/php/climateChangeFuture.php",
     type: 'POST',
     dataType: 'json',
     data: {
-      fromClimateFuture: $('#climate-select-past').val(),
-      toClimateFuture: $('#climate-select-past').data('past-to')
+      climateFutureYears: $('#climate-select-future').val(),
+    },
+    
+    success: function(result) {
+      
+     console.log(result['data']['futureAvgMonthlyTemps']);
+     const avgFutureTemps = result['data']['futureAvgMonthlyTemps']['monthVals'];
+     const avgFutureTempsFromYear = result['data']['futureAvgMonthlyTemps']['fromYear'];
+     const avgFutureTempsToYear = result['data']['futureAvgMonthlyTemps']['toYear'];
+  
+     const roundedFutureTemps = roundTempsDown(avgFutureTemps);
+    
+
+     const avgFutureTempsHTML = formatMonths(roundedFutureTemps, avgFutureTempsFromYear, avgFutureTempsToYear);
+
+     $('#future-climate').html(avgFutureTempsHTML);
+
+  
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(textStatus);
+      console.log(errorThrown);
+      console.log(jqXHR);
+    }
+  }); 
+})
+
+$('#climate-select-past').on('change', function() {
+  
+  $.ajax({
+    url: "libs/php/climateChangePast.php",
+    type: 'POST',
+    dataType: 'json',
+    data: {
+      climatePastYears: $('#climate-select-past').val(),
     },
     
     success: function(result) {
   
-     console.log(result['data']);
+      console.log(result['data']['pastAvgMonthlyTemps']);
+      const avgPastTemps = result['data']['pastAvgMonthlyTemps']['monthVals'];
+      const avgPastTempsFromYear = result['data']['pastAvgMonthlyTemps']['fromYear'];
+      const avgPastTempsToYear = result['data']['pastAvgMonthlyTemps']['toYear'];
+   
+      const roundedPastTemps = roundTempsDown(avgPastTemps);
+     
+ 
+      const avgPastTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear, avgPastTempsToYear);
+ 
+      $('#past-climate').html(avgPastTempsHTML);
+ 
   
 
   
