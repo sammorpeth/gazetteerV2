@@ -23,6 +23,7 @@
   $output['data'] = $decode;
 
   $alpha3Code = $output['data'][0]['alpha3Code'];
+  $capitalCity = $output['data'][0]['capital'];
 
   // Set country's lat and lng
   
@@ -155,19 +156,19 @@
    $output['data']['futureAvgMonthlyTemps'] = $avgFutureMonthlyTempsDecode;
    curl_close($ch8);
 
-  //  Flickr API 
-  $flickrKey = 'd05256dfd2c01b4b9a532e1a8a15ba47';
-  $flickrUrl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' . $flickrKey.'&lat=55&lon=-1.6&per_page=10&format=json';
+  //  Unsplash Photo API 
+  $flickrKey = 'IOAvRzyJoFvLnkcS60RH94kuOPgadRvRS4ZMtF6zi3c';
+  $unsplashUrl = 'https://api.unsplash.com/photos/random?count=10&query=' .$capitalCity.'&client_id=IOAvRzyJoFvLnkcS60RH94kuOPgadRvRS4ZMtF6zi3c';
 
   $ch9 = curl_init();
   curl_setopt($ch9, CURLOPT_SSL_VERIFYPEER, false);
   curl_setopt($ch9, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($ch9, CURLOPT_URL,$flickrUrl);
+  curl_setopt($ch9, CURLOPT_URL,$unsplashUrl);
 
-  $flickrInfo = curl_exec($ch9);
-  $flickrInfoDecode = json_decode($flickrInfo,true);
+  $unsplashInfo = curl_exec($ch9);
+  $unsplashInfoDecode = json_decode($unsplashInfo,true);
 
-  $output['data']['flickr'] = $flickrInfoDecode;
+  $output['data']['capitalPhotos'] = $unsplashInfoDecode;
   curl_close($ch9);
 
 

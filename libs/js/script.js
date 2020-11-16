@@ -157,6 +157,8 @@ $('#country-select').on('change', function() {
       const avgFutureTempsFromYear = selectedCountry['futureAvgMonthlyTemps'][0]['fromYear'];
       const avgFutureTempsToYear = selectedCountry['futureAvgMonthlyTemps'][0]['toYear'];
 
+      const capitalPhotos = selectedCountry['capitalPhotos'];
+
       const countryInfoHTML = `<h3>${selectedCountry[0]['name']}</h3>
                             <ul class="country-info">
                               <li>Region: ${selectedCountry[0]['region']}</li>
@@ -227,27 +229,65 @@ $('#country-select').on('change', function() {
       } else {
         countryNews.forEach(article => {
           newsHTML +=  `<div class="carousel-item">
-          <img class="d-block w-100 news-img" src="${article.urlToImage}" alt="${article.title}">
-          <h2>${article.title}</h2>
-          <a href="${article.url}">Read more...</a>
-        </div>`;
+                          <img class="d-block w-100 news-img" src="${article.urlToImage}" alt="${article.title}">
+                          <h2>${article.title}</h2>
+                          <a href="${article.url}">Read more...</a>
+                        </div>`;
         })
       }
       // Attach controls 
-      newsHTML += ` <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
-                      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                      <span class="sr-only">Previous</span>
-                    </a>
-                    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
-                      <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                      <span class="sr-only">Next</span>
-                    </a>`
+      newsControlsHTML = ` <div>
+                        <a class="carousel-control-prev" href="#newsCarousel" role="button" data-slide="prev">
+                          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                          <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#newsCarousel" role="button" data-slide="next">
+                          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                          <span class="sr-only">Next</span>
+                        </a>
+                       </div>`
+      newsHTML += newsControlsHTML;
       // Set HTML 
-      $('.carousel-inner').html(newsHTML);
+      $('#news-items').html(newsHTML);
       // Remove dummy item
       $('#news-items div:first-of-type').remove();
       // Add active class to first item to make it appear
       $('#news-items div:nth-of-type(2)').addClass('active');
+
+      // Photos 
+
+      let photosHTML = `<div class="carousel-item"></div>`;
+      
+      capitalPhotos.forEach(photo => {
+
+        if (photo.description === null) {
+          photo.description = '';
+        }
+        photosHTML += `<div class="carousel-item">
+                        <img class="d-block w-100 news-img" src="${photo.urls.raw}" alt="${photo.alt_description}">
+                        <p>${photo.description}</p>
+                      </div>`;
+      });
+
+      photosControlsHTML = ` <div>
+      <a class="carousel-control-prev" href="#photosCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="carousel-control-next" href="#photosCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
+     </div>`
+
+      photosHTML += photosControlsHTML;
+
+      // Set HTML 
+      $('#capital-photos').html(photosHTML);
+      // Remove dummy item
+      $('#capital-photos div:first-of-type').remove();
+      // Add active class to first item to make it appear
+      $('#capital-photos div:nth-of-type(2)').addClass('active');
      
       // Forex info
       if(mymap.hasLayer(forexMarker)) {
@@ -293,22 +333,25 @@ $('#country-select').on('change', function() {
       // Climate Change info
       $('#climateChangeTitle').html(`Monthly temperature averages in Celsius`);
 
-      const roundedPastTemps = roundTempsDown(avgPastTemps);
-      const roundedFutureTemps = roundTempsDown(avgFutureTemps);
-     
-
-      const avgFromTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear, avgPastTempsToYear);
-      const avgToTempsHTML = formatMonths(roundedFutureTemps, avgFutureTempsFromYear, avgFutureTempsToYear);
-
-      // Add value so the API can be called through climateChange.php
-      $('#climate-country-code').append($('<option>', {
-        value: countryIso3,
-        text: countryIso3
-      }));
-     
-
-      $('#past-climate').html(avgFromTempsHTML);
-      $('#future-climate').html(avgToTempsHTML);
+      if (avgFutureTemps && avgPastTemps) {
+        const roundedPastTemps = roundTempsDown(avgPastTemps);
+        const roundedFutureTemps = roundTempsDown(avgFutureTemps);
+  
+        const avgFromTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear, avgPastTempsToYear);
+        const avgToTempsHTML = formatMonths(roundedFutureTemps, avgFutureTempsFromYear, avgFutureTempsToYear);
+  
+        // Add value so the API can be called through climateChange.php
+        $('#climate-country-code').append($('<option>', {
+          value: countryIso3,
+          text: countryIso3
+        }));
+  
+        $('#past-climate').html(avgFromTempsHTML);
+        $('#future-climate').html(avgToTempsHTML);
+      } else {
+        $('#climate-change-stats').html(`It seems we can't get any climate change information about your chosen country. Please select another country.`);
+      }
+    
 
 
     },
