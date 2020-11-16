@@ -254,40 +254,7 @@ $('#country-select').on('change', function() {
       // Add active class to first item to make it appear
       $('#news-items div:nth-of-type(2)').addClass('active');
 
-      // Photos 
-
-      let photosHTML = `<div class="carousel-item"></div>`;
-      
-      capitalPhotos.forEach(photo => {
-
-        if (photo.description === null) {
-          photo.description = '';
-        }
-        photosHTML += `<div class="carousel-item">
-                        <img class="d-block w-100 news-img" src="${photo.urls.raw}" alt="${photo.alt_description}">
-                        <p>${photo.description}</p>
-                      </div>`;
-      });
-
-      photosControlsHTML = ` <div>
-      <a class="carousel-control-prev" href="#photosCarousel" role="button" data-slide="prev">
-        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-        <span class="sr-only">Previous</span>
-      </a>
-      <a class="carousel-control-next" href="#photosCarousel" role="button" data-slide="next">
-        <span class="carousel-control-next-icon" aria-hidden="true"></span>
-        <span class="sr-only">Next</span>
-      </a>
-     </div>`
-
-      photosHTML += photosControlsHTML;
-
-      // Set HTML 
-      $('#capital-photos').html(photosHTML);
-      // Remove dummy item
-      $('#capital-photos div:first-of-type').remove();
-      // Add active class to first item to make it appear
-      $('#capital-photos div:nth-of-type(2)').addClass('active');
+  
      
       // Forex info
       if(mymap.hasLayer(forexMarker)) {
@@ -348,6 +315,41 @@ $('#country-select').on('change', function() {
   
         $('#past-climate').html(avgFromTempsHTML);
         $('#future-climate').html(avgToTempsHTML);
+
+            // Photos 
+
+      let photosHTML = `<div class="carousel-item"></div>`;
+      
+      capitalPhotos.forEach(photo => {
+
+        if (photo.description === null) {
+          photo.description = '';
+        }
+        photosHTML += `<div class="carousel-item">
+                        <img class="d-block w-100 news-img" src="${photo.urls.raw}" alt="${photo.alt_description}">
+                        <p>${photo.description}</p>
+                      </div>`;
+      });
+
+      photosControlsHTML = ` <div>
+      <a class="carousel-control-prev" href="#photosCarousel" role="button" data-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="sr-only">Previous</span>
+      </a>
+      <a class="carousel-control-next" href="#photosCarousel" role="button" data-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="sr-only">Next</span>
+      </a>
+     </div>`
+
+      photosHTML += photosControlsHTML;
+
+      // Set HTML 
+      $('#capital-photos').html(photosHTML);
+      // Remove dummy item
+      $('#capital-photos div:first-of-type').remove();
+      // Add active class to first item to make it appear
+      $('#capital-photos div:nth-of-type(2)').addClass('active');
       } else {
         $('#climate-change-stats').html(`It seems we can't get any climate change information about your chosen country. Please select another country.`);
       }
@@ -361,6 +363,53 @@ $('#country-select').on('change', function() {
       console.log(jqXHR);
     }
   }); 
+});
+
+mymap.on('click', function(e) {
+  let lat = e.latlng.lat;
+  let lng = e.latlng.lng;
+  console.log('hi');
+
+  // Round to 4 decimal places
+  let roundedLat = lat.toFixed(2);
+  let roundedLng = lng.toFixed(2);
+
+  // Set the value of the inputs to the current mouse position coords.
+  $('#mouse-lat').html(`${roundedLat}`);
+  $('#mouse-lng').html(`${roundedLng}`);
+  $('#mouse-lat').val(roundedLat);
+  $('#mouse-lng').val(roundedLng);
+
+  console.log($('#mouse-lat').val());
+  console.log($('#mouse-lng').val());
+
+
+  $.ajax({
+  url: "libs/php/getCCMouseLatLng.php",
+  type: 'POST',
+  dataType: 'json',
+  data: {
+    mouseLat: $('#mouse-lat').val(),
+    mouseLng: $('#mouse-lng').val()
+  },
+  
+  success: function(result) {
+  
+    console.log(result['data']);
+    const countryCode = result['data']['countryCode'];
+    $('#country-select').val(countryCode);
+    $('#country-select').trigger("change");
+
+
+    },
+    error: function(jqXHR, textStatus, errorThrown) {
+      console.log(textStatus);
+      console.log(errorThrown);
+      console.log(jqXHR);
+    }
+    }); 
+    
+
 })
 
 $('#country-select').on('change', function() {
