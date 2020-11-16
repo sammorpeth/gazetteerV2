@@ -155,6 +155,21 @@
    $output['data']['futureAvgMonthlyTemps'] = $avgFutureMonthlyTempsDecode;
    curl_close($ch8);
 
+  //  Flickr API 
+  $flickrKey = 'd05256dfd2c01b4b9a532e1a8a15ba47';
+  $flickrUrl = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=' . $flickrKey.'&lat=55&lon=-1.6&per_page=10&format=json';
+
+  $ch9 = curl_init();
+  curl_setopt($ch9, CURLOPT_SSL_VERIFYPEER, false);
+  curl_setopt($ch9, CURLOPT_RETURNTRANSFER, true);
+  curl_setopt($ch9, CURLOPT_URL,$flickrUrl);
+
+  $flickrInfo = curl_exec($ch9);
+  $flickrInfoDecode = json_decode($flickrInfo,true);
+
+  $output['data']['flickr'] = $flickrInfoDecode;
+  curl_close($ch9);
+
 
   header('Content-Type: application/json; charset=UTF-8');
 	

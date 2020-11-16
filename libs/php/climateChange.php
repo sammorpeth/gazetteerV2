@@ -2,8 +2,8 @@
 $executionStartTime = microtime(true) / 1000;
 
 // $climateFutureYears = '2040|2059';
-$climateFutureYears = $_REQUEST['climateFutureYears'];
-$exploded_value = explode('|', $climateFutureYears);
+$climateYears = $_REQUEST['climateYears'];
+$exploded_value = explode('|', $climateYears);
 $fromYear = $exploded_value[0];
 $toYear = $exploded_value[1];
 
@@ -25,7 +25,7 @@ $output['status']['code'] = "200";
 $output['status']['name'] = "ok";
 $output['status']['description'] = "mission saved";
 $output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
-$output['data']['futureAvgMonthlyTemps'] = $avgFutureMonthlyTempsDecode[0];
+$output['data']['avgMonthlyTemps'] = $avgFutureMonthlyTempsDecode[0];
 curl_close($ch);
 
 

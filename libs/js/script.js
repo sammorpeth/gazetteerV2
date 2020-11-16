@@ -39,6 +39,17 @@ const formatMonths = (arr, fromYear, toYear) => {
   return climateHTML;
 }
 
+const formatAvgTemps = (result) => {
+  const avgTemps = result['data']['avgMonthlyTemps']['monthVals'];
+  const avgTempsFromYear = result['data']['avgMonthlyTemps']['fromYear'];
+  const avgTempsToYear = result['data']['avgMonthlyTemps']['toYear'];
+   
+  const roundedPastTemps = roundTempsDown(avgTemps);
+ 
+  const avgTempsHTML = formatMonths(roundedPastTemps, avgTempsFromYear, avgTempsToYear);
+  return avgTempsHTML;
+}
+
 
 const LeafIcon = L.Icon.extend({
   options: {
@@ -48,14 +59,10 @@ const LeafIcon = L.Icon.extend({
 
 $(document).ready(function() {
 
-  
-
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
       const userPosLat = position.coords.latitude;
       const userPosLng = position.coords.longitude;
-
-
 
       $.ajax({
         url: "libs/php/getUserCountry.php",
@@ -185,7 +192,6 @@ $('#country-select').on('change', function() {
                                     <li>Temperature: ${capitalWeather['main']['temp']}&#176;C</li>
                                     <li>Humidity: ${capitalWeather['main']['humidity']}%</li>
                                     <li>Wind Speed: ${capitalWeather['wind']['speed']}km/h</li>
-                                   
                                   <ul>`
       
       weatherMarker.bindPopup(capitalWeatherHTML);
@@ -294,7 +300,7 @@ $('#country-select').on('change', function() {
       const avgFromTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear, avgPastTempsToYear);
       const avgToTempsHTML = formatMonths(roundedFutureTemps, avgFutureTempsFromYear, avgFutureTempsToYear);
 
-      // Add value so the API can be called through climateChangeFuture.php etc.
+      // Add value so the API can be called through climateChange.php
       $('#climate-country-code').append($('<option>', {
         value: countryIso3,
         text: countryIso3
@@ -387,34 +393,23 @@ $('#country-select').on('change', function() {
 });
 
 
-
-
 $('#climate-select-future').on('change', function() {
   
   $.ajax({
-    url: "libs/php/climateChangeFuture.php",
+    url: "libs/php/climateChange.php",
     type: 'POST',
     dataType: 'json',
     data: {
-      countryCode: $('#climate-country-code').val(),
-      climateFutureYears: $('#climate-select-future').val(),
+      countryCode: $('#climate-country-code option:last').val(),
+      climateYears: $('#climate-select-future').val(),
     },
     
     success: function(result) {
-      
-     console.log(result['data']['futureAvgMonthlyTemps']);
-     const avgFutureTemps = result['data']['futureAvgMonthlyTemps']['monthVals'];
-     const avgFutureTempsFromYear = result['data']['futureAvgMonthlyTemps']['fromYear'];
-     const avgFutureTempsToYear = result['data']['futureAvgMonthlyTemps']['toYear'];
-  
-     const roundedFutureTemps = roundTempsDown(avgFutureTemps);
-    
-
-     const avgFutureTempsHTML = formatMonths(roundedFutureTemps, avgFutureTempsFromYear, avgFutureTempsToYear);
-
+      console.log(result['data']);
+      const avgFutureTempsHTML = formatAvgTemps(result);
+     
      $('#future-climate').html(avgFutureTempsHTML);
 
-  
     },
     error: function(jqXHR, textStatus, errorThrown) {
       console.log(textStatus);
@@ -427,30 +422,19 @@ $('#climate-select-future').on('change', function() {
 $('#climate-select-past').on('change', function() {
   
   $.ajax({
-    url: "libs/php/climateChangePast.php",
+    url: "libs/php/climateChange.php",
     type: 'POST',
     dataType: 'json',
     data: {
-      countryCode: $('#climate-country-code').val(),
-      climatePastYears: $('#climate-select-past').val(),
+      countryCode: $('#climate-country-code option:last').val(),
+      climateYears: $('#climate-select-past').val(),
     },
     
     success: function(result) {
   
-      console.log(result['data']['pastAvgMonthlyTemps']);
-      const avgPastTemps = result['data']['pastAvgMonthlyTemps']['monthVals'];
-      const avgPastTempsFromYear = result['data']['pastAvgMonthlyTemps']['fromYear'];
-      const avgPastTempsToYear = result['data']['pastAvgMonthlyTemps']['toYear'];
-   
-      const roundedPastTemps = roundTempsDown(avgPastTemps);
-     
- 
-      const avgPastTempsHTML = formatMonths(roundedPastTemps, avgPastTempsFromYear, avgPastTempsToYear);
+      const avgPastTempsHTML = formatAvgTemps(result);
  
       $('#past-climate').html(avgPastTempsHTML);
- 
-  
-
   
     },
     error: function(jqXHR, textStatus, errorThrown) {
