@@ -198,6 +198,7 @@ $('#country-select').on('change', function() {
       const avgFutureTempsToYear = selectedCountry['futureAvgMonthlyTemps'][0]['toYear'];
 
       const capitalPhotos = selectedCountry['capitalPhotos'];
+      console.log(capitalPhotos);
 
       const countryInfoHTML = `<h4>${selectedCountry[0]['name']}</h4>
                             <ul class="country-info">
@@ -366,8 +367,9 @@ $('#country-select').on('change', function() {
           photo.description = '';
         }
         photosHTML += `<div class="carousel-item">
-                        <img class="d-block w-100 news-img" src="${photo.urls.raw}" alt="${photo.alt_description}">
+                        <img class="d-block w-100 news-img" src="${photo.urls.full}" alt="${photo.alt_description}">
                         <p>${photo.description}</p>
+                        <p>Taken by <a href="${photo.user.links.html}">${photo.user.first_name} ${photo.user.last_name}</a></p>
                       </div>`;
       });
 
