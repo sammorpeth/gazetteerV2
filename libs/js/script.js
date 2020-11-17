@@ -167,7 +167,6 @@ $('#country-select').on('change', function() {
     },
     
     success: function(result) {
-    console.log(result['data']);
    
       const selectedCountry = result['data'];
       // set country's lat and lng
@@ -175,7 +174,6 @@ $('#country-select').on('change', function() {
       const countryLng = selectedCountry[0]['latlng'][1];
       const countryName = selectedCountry[0]['name'];
       const countryIso3 = selectedCountry[0]['alpha3Code'];
-      console.log(countryIso3);
 
       const weatherLat = selectedCountry['capitalWeather']['coord']['lat'];
       const weatherLng = selectedCountry['capitalWeather']['coord']['lon'];
