@@ -120,7 +120,7 @@
   curl_close($ch6);
 
   foreach ($coronaInfoDecode['Countries'] as $country) {
-    if($country['CountryCode'] == 'GB') {
+    if($country['CountryCode'] == $_REQUEST['countryCode']) {
       $matchedStats = $country;
     }
   }

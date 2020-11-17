@@ -11,6 +11,25 @@ const OpenStreetMap_Mapnik = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}
 	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 }).addTo(mymap);
 
+const OpenTopoMap = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+	maxZoom: 17,
+	attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)'
+});
+
+const Esri_WorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+});
+
+
+
+const baseMaps = {
+  "Open Street Map" : OpenStreetMap_Mapnik,
+  "Topographical" : OpenTopoMap,
+  "Esri Street Map" : Esri_WorldStreetMap,
+}
+
+L.control.layers(baseMaps).addTo(mymap);
+
 const removeMarker = (typeOfMarker) => {
   if(mymap.hasLayer(typeOfMarker)) {
     mymap.removeLayer(typeOfMarker);
@@ -39,6 +58,8 @@ const formatMonths = (arr, fromYear, toYear) => {
   return climateHTML;
 }
 
+
+
 const formatAvgTemps = (result) => {
   const avgTemps = result['data']['avgMonthlyTemps']['monthVals'];
   const avgTempsFromYear = result['data']['avgMonthlyTemps']['fromYear'];
@@ -55,14 +76,35 @@ const LeafIcon = L.Icon.extend({
   options: {
     iconSize: [50, 50]
   }
-})
+});
+
+
 
 $(document).ready(function() {
 
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
+     
       const userPosLat = position.coords.latitude;
       const userPosLng = position.coords.longitude;
+
+      
+      // L.easyButton('fa-globe', function(){}).addTo( mymap );
+      L.easyButton({
+        id: 'centre-view',  // an id for the generated button
+        position: 'topleft',      // inherited from L.Control -- the corner it goes in
+        type: 'replace',          // set to animate when you're comfy with css
+        leafletClasses: true,     // use leaflet classes to style the button?
+        states:[{                 // specify different icons and responses for your button
+          stateName: 'get-center',
+         
+          title: 'show me the middle',
+          icon: 'glyphicon-globe'
+        }]
+      }).addTo(mymap);
+     
+      
+      
 
       $.ajax({
         url: "libs/php/getUserCountry.php",
@@ -159,7 +201,7 @@ $('#country-select').on('change', function() {
 
       const capitalPhotos = selectedCountry['capitalPhotos'];
 
-      const countryInfoHTML = `<h3>${selectedCountry[0]['name']}</h3>
+      const countryInfoHTML = `<h4>${selectedCountry[0]['name']}</h4>
                             <ul class="country-info">
                               <li>Region: ${selectedCountry[0]['region']}</li>
                               <li>Subregion: ${selectedCountry[0]['subregion']}</li>
@@ -368,7 +410,6 @@ $('#country-select').on('change', function() {
 mymap.on('click', function(e) {
   let lat = e.latlng.lat;
   let lng = e.latlng.lng;
-  console.log('hi');
 
   // Round to 4 decimal places
   let roundedLat = lat.toFixed(2);
@@ -379,9 +420,6 @@ mymap.on('click', function(e) {
   $('#mouse-lng').html(`${roundedLng}`);
   $('#mouse-lat').val(roundedLat);
   $('#mouse-lng').val(roundedLng);
-
-  console.log($('#mouse-lat').val());
-  console.log($('#mouse-lng').val());
 
 
   $.ajax({
@@ -395,7 +433,6 @@ mymap.on('click', function(e) {
   
   success: function(result) {
   
-    console.log(result['data']);
     const countryCode = result['data']['countryCode'];
     $('#country-select').val(countryCode);
     $('#country-select').trigger("change");
@@ -437,6 +474,13 @@ $('#country-select').on('change', function() {
     // Zoom and fit the map edge around it
     border.addTo(mymap);
     mymap.fitBounds(border.getBounds());
+
+    // Add functionality for centre view button
+    $('#centre-view').on('click', function() {
+    mymap.fitBounds(border.getBounds());
+
+    })
+
 
   
     },
@@ -535,4 +579,7 @@ $('#climate-select-past').on('change', function() {
       console.log(jqXHR);
     }
   }); 
-})
+});
+
+
+
