@@ -21,7 +21,6 @@ const Esri_WorldStreetMap = L.tileLayer('https://server.arcgisonline.com/ArcGIS/
 });
 
 
-
 const baseMaps = {
   "Open Street Map" : OpenStreetMap_Mapnik,
   "Topographical" : OpenTopoMap,
@@ -47,14 +46,18 @@ const roundTempsDown = (arr) => {
 const formatMonths = (arr, fromYear, toYear) => {
   const monthsArr = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  const combined = monthsArr.map((val, idx) => `<li>${val} - ${arr[idx]}</li>`);
+  const combined = monthsArr.map((val, idx) => `<tr>
+                                                  <td>${val} -</td>
+                                                  <td> ${arr[idx]}</td>
+                                                </tr>`);
   climateHTML = `<h3>${fromYear} -  ${toYear}</h3>
-                  <ul>`;
+                  <table>
+                    `;
   combined.forEach(dataPoint => {
     climateHTML += dataPoint;
   })
 
-  climateHTML += `</ul>`;
+  climateHTML += `</table>`;
   return climateHTML;
 }
 
@@ -82,6 +85,7 @@ const LeafIcon = L.Icon.extend({
 
 $(document).ready(function() {
 
+
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
      
@@ -98,11 +102,12 @@ $(document).ready(function() {
         states:[{                 // specify different icons and responses for your button
           stateName: 'get-center',
          
-          title: 'show me the middle',
-          icon: 'glyphicon-globe'
+          title: 're-centre the map',
+          icon: `<img src="imgs/focus.svg" aria-hidden="true">`
         }]
       }).addTo(mymap);
      
+      $('#loadingModal').modal('show');
       
       
 
@@ -117,13 +122,15 @@ $(document).ready(function() {
         
         success: function(result) {
       
-        //  console.log(result['data']);
          $('#country-select').val(result['data']);
          $('#country-select').trigger("change");
+         $('#loadingModal').modal('hide');
     
       
         },
         error: function(jqXHR, textStatus, errorThrown) {
+        $('#loadingModal').modal('hide');
+
           console.log(textStatus);
           console.log(errorThrown);
           console.log(jqXHR);
@@ -150,6 +157,8 @@ $(document).ready(function() {
   
     },
     error: function(jqXHR, textStatus, errorThrown) {
+      $('#loadingModal').modal('hide');
+
       console.log(textStatus);
       console.log(errorThrown);
       console.log(jqXHR);
@@ -158,6 +167,8 @@ $(document).ready(function() {
 });
 
 $('#country-select').on('change', function() {
+  $('#loadingModal').modal('show');
+
   $.ajax({
     url: "libs/php/restCountries.php",
     type: 'POST',
@@ -167,7 +178,8 @@ $('#country-select').on('change', function() {
     },
     
     success: function(result) {
-   
+      $('#loadingModal').modal('hide');
+
       const selectedCountry = result['data'];
       // set country's lat and lng
       const countryLat = selectedCountry[0]['latlng'][0];
@@ -196,9 +208,30 @@ $('#country-select').on('change', function() {
       const avgFutureTemps = selectedCountry['futureAvgMonthlyTemps'][0]['monthVals'];
       const avgFutureTempsFromYear = selectedCountry['futureAvgMonthlyTemps'][0]['fromYear'];
       const avgFutureTempsToYear = selectedCountry['futureAvgMonthlyTemps'][0]['toYear'];
+      const countryBorders = selectedCountry['borders'];
 
       const capitalPhotos = selectedCountry['capitalPhotos'];
-      console.log(capitalPhotos);
+
+      // Add border to map
+      if(mymap.hasLayer(border)) {
+        mymap.removeLayer(border);
+      };
+      
+      // Style border
+      border = L.geoJSON(countryBorders, {
+          style: function () {
+            return {opacity: 1, color: '#67B26F'}
+        }});
+  
+      // Zoom and fit the map edge around it
+      border.addTo(mymap);
+      mymap.fitBounds(border.getBounds());
+
+      // Add easy button functionality
+      $('#centre-view').on('click', function() {
+        mymap.fitBounds(border.getBounds());
+    
+        })
 
       const countryInfoHTML = `<h4>${selectedCountry[0]['name']}</h4>
                             <ul class="country-info">
@@ -211,7 +244,6 @@ $('#country-select').on('change', function() {
                             <ul>`
 
        // go to relevant lat and lng
-
       const countryPopup = L.popup()
             .setLatLng([countryLat, countryLng])
             .setContent(countryInfoHTML)
@@ -223,9 +255,7 @@ $('#country-select').on('change', function() {
       // Weather Marker
       removeMarker(weatherMarker);
    
-
       const weatherMarkerIcon = new LeafIcon({iconUrl: 'imgs/blue-icon.png'});
-
 
       weatherMarker = L.marker([weatherLat, weatherLng], {icon: weatherMarkerIcon}).addTo(mymap);
 
@@ -242,10 +272,8 @@ $('#country-select').on('change', function() {
       // Wiki Marker Clusters
       removeMarker(wikiMarkers);
 
-
       wikiMarkers = L.markerClusterGroup();
       const wikiMarkerIcon = new LeafIcon({iconUrl: 'imgs/green-icon.png'});
-
 
       capitalWiki.forEach(element => {
         const wikiHTML = `${element.summary}
@@ -264,9 +292,9 @@ $('#country-select').on('change', function() {
       let newsHTML = `<div class="carousel-item"></div>`;
                      
    
-      if(countryNews.length === 0) {
+      if(countryNews === undefined) {
          // Default HTML for most countries
-        newsHTML = `<h4>It seems we can't get any news for your chosen country. Please choose a different country.</h4>`
+        newsHTML = `<h4>It seems we can't get any news for your chosen country. Please choose a different country or try again later.</h4>`
       } else {
         countryNews.forEach(article => {
           newsHTML +=  `<div class="carousel-item">
@@ -360,20 +388,26 @@ $('#country-select').on('change', function() {
             // Photos 
 
       let photosHTML = `<div class="carousel-item"></div>`;
+
+      if (!capitalPhotos === null) {
+        capitalPhotos.forEach(photo => {
+
+          if (photo.description === null) {
+            photo.description = '';
+          }
+          photosHTML += `<div class="carousel-item">
+                          <img class="d-block w-100 news-img" src="${photo.urls.full}" alt="${photo.alt_description}">
+                          <p>${photo.description}</p>
+                          <p>Taken by <a href="${photo.user.links.html}">${photo.user.first_name} ${photo.user.last_name}</a></p>
+                        </div>`;
+        });
+      } else {
+        $('#capital-photos').html('<p>hi</p>');
+      }
+       
       
-      capitalPhotos.forEach(photo => {
-
-        if (photo.description === null) {
-          photo.description = '';
-        }
-        photosHTML += `<div class="carousel-item">
-                        <img class="d-block w-100 news-img" src="${photo.urls.full}" alt="${photo.alt_description}">
-                        <p>${photo.description}</p>
-                        <p>Taken by <a href="${photo.user.links.html}">${photo.user.first_name} ${photo.user.last_name}</a></p>
-                      </div>`;
-      });
-
-      photosControlsHTML = ` <div>
+      
+      photosControlsHTML = `<div>
       <a class="carousel-control-prev" href="#photosCarousel" role="button" data-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="sr-only">Previous</span>
@@ -400,6 +434,8 @@ $('#country-select').on('change', function() {
 
     },
     error: function(jqXHR, textStatus, errorThrown) {
+      $('#loadingModal').modal('hide');
+      
       console.log(textStatus);
       console.log(errorThrown);
       console.log(jqXHR);
@@ -440,6 +476,8 @@ mymap.on('click', function(e) {
 
     },
     error: function(jqXHR, textStatus, errorThrown) {
+      $('#loadingModal').modal('hide');
+
       console.log(textStatus);
       console.log(errorThrown);
       console.log(jqXHR);
@@ -448,85 +486,6 @@ mymap.on('click', function(e) {
     
 
 })
-
-$('#country-select').on('change', function() {
-  $.ajax({
-    url: "libs/php/countryBorders.php",
-    type: 'POST',
-    dataType: 'json',
-    data: {
-      countryCode: $('#country-select').val()
-    },
-    
-    success: function(result) {
-    
-    // Check if there's a previous border, if so remove it.
-    if(mymap.hasLayer(border)) {
-      mymap.removeLayer(border);
-    };
-
-
-    border = L.geoJSON(result['data'], {
-        style: function () {
-          return {opacity: 1, color: '#67B26F'}
-      }});
-
-    // Zoom and fit the map edge around it
-    border.addTo(mymap);
-    mymap.fitBounds(border.getBounds());
-
-    // Add functionality for centre view button
-    $('#centre-view').on('click', function() {
-    mymap.fitBounds(border.getBounds());
-
-    })
-
-
-  
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus);
-      console.log(errorThrown);
-      console.log(jqXHR);
-    }
-  }); 
-});
-
-$('#country-select').on('change', function() {
-  $.ajax({
-    url: "libs/php/countryBorders.php",
-    type: 'POST',
-    dataType: 'json',
-    data: {
-      countryCode: $('#country-select').val()
-    },
-    
-    success: function(result) {
-    
-    // Check if there's a previous border, if so remove it.
-    if(mymap.hasLayer(border)) {
-      mymap.removeLayer(border);
-    };
-
-
-    border = L.geoJSON(result['data'], {
-        style: function () {
-          return {opacity: 1, color: '#67B26F'}
-      }});
-
-    // Zoom and fit the map edge around it
-    border.addTo(mymap);
-    mymap.fitBounds(border.getBounds());
-
-  
-    },
-    error: function(jqXHR, textStatus, errorThrown) {
-      console.log(textStatus);
-      console.log(errorThrown);
-      console.log(jqXHR);
-    }
-  }); 
-});
 
 
 $('#climate-select-future').on('change', function() {
@@ -541,13 +500,14 @@ $('#climate-select-future').on('change', function() {
     },
     
     success: function(result) {
-      console.log(result['data']);
       const avgFutureTempsHTML = formatAvgTemps(result);
      
      $('#future-climate').html(avgFutureTempsHTML);
 
     },
     error: function(jqXHR, textStatus, errorThrown) {
+      $('#loadingModal').modal('hide');
+
       console.log(textStatus);
       console.log(errorThrown);
       console.log(jqXHR);
@@ -574,6 +534,8 @@ $('#climate-select-past').on('change', function() {
   
     },
     error: function(jqXHR, textStatus, errorThrown) {
+      $('#loadingModal').modal('hide');
+
       console.log(textStatus);
       console.log(errorThrown);
       console.log(jqXHR);

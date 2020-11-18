@@ -171,6 +171,18 @@
   $output['data']['capitalPhotos'] = $unsplashInfoDecode;
   curl_close($ch9);
 
+  $countries = json_decode(file_get_contents('../json/countryBorders.geo.json'), true);
+
+  $matchedCountryBorders;
+
+  foreach ($countries['features'] as $feature) {
+    if ($feature['properties']['iso_a2'] == $_REQUEST['countryCode']) {
+      $matchedCountryBorders = $feature;
+    }
+  }
+
+  $output['data']['borders'] = $matchedCountryBorders;
+
 
   header('Content-Type: application/json; charset=UTF-8');
 	

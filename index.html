@@ -17,18 +17,18 @@
     
 
     <!-- Bootstrap core CSS -->
-    <link href="libs/css/cover.css" rel="stylesheet">
-    <link href="libs/css/bootstrap.css" rel="stylesheet">
+    <link href="libs/css/vendor/cover.css" rel="stylesheet">
+    <link href="libs/css/vendor/bootstrap.css" rel="stylesheet">
     <!-- Leaflet CSS -->
-    <link href="libs/css/leaflet.css" rel="stylesheet">
-    <link href="libs/css/MarkerCluster.Default.css" rel="stylesheet">
+    <link href="libs/css/vendor/leaflet.css" rel="stylesheet">
+    <link href="libs/css/vendor/MarkerCluster.Default.css" rel="stylesheet">
+    <!-- EasyButton CSS -->
+    <link href="libs/css/vendor/easy-button.css" rel="stylesheet">
+   
 
     <link href="libs/css/style.css" rel="stylesheet">
-    <link href="libs/css/easy-button.css" rel="stylesheet">
 
    
-    <!-- Custom styles for this template -->
-    <link href="cover.css" rel="stylesheet">
   </head>
 
   <body class="text-center">
@@ -71,6 +71,7 @@
           <div id="future-climate"></div>
         </div>
         <div class="modal-footer">
+          <i class="fab fa-500px"></i>
           <select class="custom-select" id="climate-select-past">
             <option value="1920|1939">1920-1939</option>
             <option value="1940|1959">1940-1959</option>
@@ -176,22 +177,34 @@
       </div>
     </div>
   </div>
+    
+     
   </div>
-  
+
+  <!-- Small modal -->
+
+  <div class="modal fade bd-example-modal-sm" id="loadingModal" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        Loading...
+      </div>
+    </div>
+  </div>
 
   <footer class="mastfoot mt-auto">
     <div class="inner">
       <p>Cover template for <a href="https://getbootstrap.com/">Bootstrap</a>, by <a href="https://twitter.com/mdo">@mdo.</a>
-        Icons supplied by <a href="https://icons8.com">Icons8.com</a></p>
+        Icons supplied by <a href="https://icons8.com">Icons8.com</a> and <a href="https://www.flaticon.com/authors/xnimrodx" title="xnimrodx">xnimrodx</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></p>
       
     </div>
   </footer>
 
-  <script src="libs/js/jquery-2.2.3.min.js"></script>
-  <script src="libs/js/bootstrap.bundle.min.js"></script>
-  <script src="libs/js/leaflet.js"></script>
-  <script src="libs/js/leaflet.markercluster.js"></script>
+  <script src="libs/js/vendor/jquery-2.2.3.min.js"></script>
+  <script src="libs/js/vendor/bootstrap.bundle.min.js"></script>
+  <script src="libs/js/vendor/leaflet.js"></script>
+  <script src="libs/js/vendor/leaflet.markercluster.js"></script>
+  <script src="libs/js/vendor/easy-button.js"></script>
   <script src="libs/js/script.js"></script>
-  <script src="libs/js/easy-button.js"></script>
+
 </body>
 </html>
